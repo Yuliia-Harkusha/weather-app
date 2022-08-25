@@ -15,37 +15,40 @@ const fetchWeather = async (city) => {
     const baseUrl = 'https://api.openweathermap.org/data/2.5/weather?';
 
     return await axios.get(`${baseUrl}q=${city}&units=metric&appid=${apiKey}`).then(response => response.data);
-
-    if(!response.ok) {
-        // Notify.warning('No weather found');
-        throw new Error ('No weather found');
-    };
 };
 
 async function onSearchForm (e) {
     e.preventDefault();
     const query = search.value;
-    // if (query === '') {
-    //     Notiflix.Notify.warning('No weather found');
-    //     return;
-    // };
+    if (query === undefined || query === '') {
+        Notiflix.Notify.info('Please enter a valid request');
+        return;
+    };
 
-    const data = await fetchWeather(query);
+    try {
+        const data = await fetchWeather(query);
 
-    const {name} = data;
-    const { icon, description } = data.weather[0];
-    const { temp, feels_like, humidity} = data.main;
-    const {speed} = data.wind;
+        const {name} = data;
+        const { icon, description } = data.weather[0];
+        const { temp, feels_like, humidity} = data.main;
+        const { speed } = data.wind;
 
-    city.textContent = `Weather in ${name}`;
-    iconSky.src = 'https://openweathermap.org/img/wn/' + icon + '.png';
-    describe.textContent = description;
-    temperature.textContent = Math.round(temp) + "°C";
-    feels.textContent ='Feels like: ' + Math.round(feels_like) + "°C";
-    humid.textContent = 'Humidity: ' + humidity + '%';
-    wind.textContent = 'Wind speed: ' + speed + ' km/h';
-    weather.classList.remove('loading');
-    body.style.backgroundImage = `url('https://source.unsplash.com/1600x900/?${name}'`;
+        city.textContent = `Weather in ${name}`;
+        iconSky.src = 'https://openweathermap.org/img/wn/' + icon + '.png';
+        describe.textContent = description;
+        temperature.textContent = Math.round(temp) + "°C";
+        feels.textContent ='Feels like: ' + Math.round(feels_like) + "°C";
+        humid.textContent = 'Humidity: ' + humidity + '%';
+        wind.textContent = 'Wind speed: ' + speed + ' km/h';
+        weather.classList.remove('loading');
+        body.style.backgroundImage = `url('https://source.unsplash.com/1600x900/?${name}'`;
+
+    } catch (error) {
+        console.log(error);
+        if(error.response.status === 404) {
+        return Notiflix.Notify.warning('No weather found');
+    };
+    };
 };
 
 form.addEventListener('submit', onSearchForm);
